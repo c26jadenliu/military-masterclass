@@ -221,7 +221,7 @@ button, input, select, textarea { font: inherit; }
   position: sticky;
   top: 92px;
 }
-.search-label, .question-form label, .filter-title {
+.search-label, .question-form label, .subscribe-form label, .filter-title {
   display: block;
   margin-bottom: 8px;
   color: var(--muted);
@@ -229,14 +229,14 @@ button, input, select, textarea { font: inherit; }
   font-weight: 760;
   text-transform: uppercase;
 }
-.search-input, .question-form input, .question-form select, .question-form textarea {
+.search-input, .question-form input, .question-form select, .question-form textarea, .subscribe-form input {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fff;
   color: var(--ink);
 }
-.search-input, .question-form input, .question-form select {
+.search-input, .question-form input, .question-form select, .subscribe-form input {
   min-height: 44px;
   padding: 0 12px;
 }
@@ -442,11 +442,11 @@ button, input, select, textarea { font: inherit; }
   padding-top: 20px;
   border-top: 1px solid var(--line);
 }
-.question-form {
+.question-form, .subscribe-form {
   display: grid;
   gap: 10px;
 }
-.question-form .button {
+.question-form .button, .subscribe-form .button {
   width: 100%;
   margin-top: 6px;
 }
@@ -532,6 +532,33 @@ button, input, select, textarea { font: inherit; }
   margin: 10px 0 0;
   color: var(--muted);
 }
+.subscribe-shell {
+  width: min(960px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 38px 0 46px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 24px;
+  align-items: start;
+}
+.subscribe-panel {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.05);
+}
+.subscribe-panel h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  letter-spacing: 0;
+}
+.subscribe-panel ul {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+.subscribe-panel li + li { margin-top: 8px; }
 .sent-message {
   display: none;
   margin: 0 0 16px;
@@ -543,6 +570,9 @@ button, input, select, textarea { font: inherit; }
   font-weight: 680;
 }
 body[data-contact-sent="true"] .sent-message {
+  display: block;
+}
+body[data-subscribe-sent="true"] .sent-message {
   display: block;
 }
 .view { display: none; }
@@ -562,7 +592,7 @@ body[data-view="blog"] .view-blog { display: block; }
 @media (max-width: 980px) {
   .overview-copy h1 { font-size: 3.25rem; }
   .overview, .library-shell, .blog-shell, .reader-panel { grid-template-columns: 1fr; }
-  .contact-shell { grid-template-columns: 1fr; }
+  .contact-shell, .subscribe-shell { grid-template-columns: 1fr; }
   .filters, .discussion-panel { position: static; }
   .card-grid, .blog-cards, .visual-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -598,6 +628,7 @@ body[data-view="blog"] .view-blog { display: block; }
         <div class="nav-links">
           <a href="#library" data-nav="library" aria-current="page">Library</a>
           <a href="#blog" data-nav="blog">Blog &amp; Q&amp;A</a>
+          <a href="subscribe.html">Subscribe</a>
           <a href="contact.html">Contact</a>
         </div>
       </nav>
@@ -677,6 +708,23 @@ body[data-view="blog"] .view-blog { display: block; }
             </section>
 
             <aside class="discussion-panel">
+              <div class="panel-section">
+                <p class="eyebrow">Updates</p>
+                <h2>Subscribe</h2>
+                <form id="blog-subscribe-form" class="subscribe-form" method="POST">
+                  <input type="text" name="_honey" tabindex="-1" autocomplete="off" style="display:none">
+                  <input type="hidden" name="_subject" value="Military Masterclass mailing list signup">
+                  <input type="hidden" name="_template" value="table">
+                  <input type="hidden" name="_captcha" value="false">
+                  <input type="hidden" name="_next" value="https://c26jadenliu.github.io/military-masterclass/subscribe.html#subscribed">
+                  <input type="hidden" name="source" value="Blog sidebar">
+                  <label for="blog-subscribe-name">Name</label>
+                  <input id="blog-subscribe-name" name="name" autocomplete="name" required>
+                  <label for="blog-subscribe-email">Email</label>
+                  <input id="blog-subscribe-email" name="email" type="email" autocomplete="email" required>
+                  <button class="button primary" type="submit">Join mailing list</button>
+                </form>
+              </div>
               <div class="panel-section">
                 <p class="eyebrow">Ask</p>
                 <h2>Start a question</h2>
@@ -1002,6 +1050,13 @@ async function renderIssues() {
   }
 }
 
+function initSubscribeForms() {
+  const mailingListEmail = ["jadentliu21", "gmail.com"].join("@");
+  document.querySelectorAll(".subscribe-form").forEach((form) => {
+    form.action = `https://formsubmit.co/${mailingListEmail}`;
+  });
+}
+
 function setView(view) {
   const current = view === "blog" ? "blog" : "library";
   document.body.dataset.view = current;
@@ -1039,6 +1094,7 @@ renderCards();
 renderBlogPosts();
 initQuestionForm();
 renderIssues();
+initSubscribeForms();
 
 document.querySelector("#site-search").addEventListener("input", (event) => {
   state.query = event.target.value;

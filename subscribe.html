@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Contact | Military Credit Card Masterclass</title>
-    <meta name="description" content="Contact the Military Credit Card Masterclass.">
+    <title>Subscribe | Military Credit Card Masterclass</title>
+    <meta name="description" content="Subscribe for Military Credit Card Masterclass updates.">
     <link rel="icon" href="data:,">
     <style>
 :root {
@@ -627,8 +627,8 @@ body[data-view="blog"] .view-blog { display: block; }
         <div class="nav-links">
           <a href="./#library">Library</a>
           <a href="./#blog">Blog &amp; Q&amp;A</a>
-          <a href="subscribe.html">Subscribe</a>
-          <a href="contact.html" aria-current="page">Contact</a>
+          <a href="subscribe.html" aria-current="page">Subscribe</a>
+          <a href="contact.html">Contact</a>
         </div>
       </nav>
     </header>
@@ -637,56 +637,46 @@ body[data-view="blog"] .view-blog { display: block; }
       <section class="overview-band">
         <div class="overview">
           <div class="overview-copy">
-            <p class="eyebrow">Contact</p>
-            <h1>Send a Message</h1>
-            <p class="lead">Reach out about the Military Credit Card Masterclass.</p>
+            <p class="eyebrow">Updates</p>
+            <h1>Subscribe</h1>
+            <p class="lead">Get an email when new lessons, field notes, and course updates are published.</p>
           </div>
           <div class="stats-grid">
-            <div class="stat-card"><strong>Email</strong><span>Direct contact</span></div>
-            <div class="stat-card"><strong>Q&amp;A</strong><span>Public questions</span></div>
-            <div class="stat-card"><strong>MCC</strong><span>Course archive</span></div>
-            <div class="stat-card"><strong>GitHub</strong><span>Discussion threads</span></div>
+            <div class="stat-card"><strong>New</strong><span>Lessons</span></div>
+            <div class="stat-card"><strong>Field</strong><span>Notes</span></div>
+            <div class="stat-card"><strong>Q&amp;A</strong><span>Roundups</span></div>
+            <div class="stat-card"><strong>MCC</strong><span>Updates</span></div>
           </div>
         </div>
       </section>
 
-      <section class="contact-shell">
-        <article class="contact-panel">
-          <p class="sent-message" id="sent-message">Message sent.</p>
-          <form id="contact-form" class="contact-form" method="POST">
+      <section class="subscribe-shell">
+        <article class="subscribe-panel">
+          <p class="sent-message" id="subscribe-sent-message">You are on the update list.</p>
+          <form id="subscribe-form" class="subscribe-form" method="POST">
             <input type="text" name="_honey" tabindex="-1" autocomplete="off" style="display:none">
-            <input type="hidden" name="_subject" value="Military Credit Card Masterclass contact">
+            <input type="hidden" name="_subject" value="Military Masterclass mailing list signup">
             <input type="hidden" name="_template" value="table">
             <input type="hidden" name="_captcha" value="false">
-            <input type="hidden" name="_next" value="https://c26jadenliu.github.io/military-masterclass/contact.html#sent">
+            <input type="hidden" name="_next" value="https://c26jadenliu.github.io/military-masterclass/subscribe.html#subscribed">
+            <input type="hidden" name="source" value="Subscribe page">
 
-            <div>
-              <label for="contact-name">Name</label>
-              <input id="contact-name" name="name" autocomplete="name" required>
-            </div>
-            <div>
-              <label for="contact-email">Email</label>
-              <input id="contact-email" name="email" type="email" autocomplete="email" required>
-            </div>
-            <div>
-              <label for="contact-subject">Subject</label>
-              <input id="contact-subject" name="subject" required>
-            </div>
-            <div>
-              <label for="contact-message">Message</label>
-              <textarea id="contact-message" name="message" required></textarea>
-            </div>
-            <button class="button primary" type="submit">Send Email</button>
+            <label for="subscribe-name">Name</label>
+            <input id="subscribe-name" name="name" autocomplete="name" required>
+            <label for="subscribe-email">Email</label>
+            <input id="subscribe-email" name="email" type="email" autocomplete="email" required>
+            <button class="button primary" type="submit">Join mailing list</button>
           </form>
         </article>
 
-        <aside class="contact-panel">
-          <p class="eyebrow">Email</p>
-          <h2 id="contact-email-display">Email</h2>
-          <p class="contact-note">For a direct message, use the form or email the address above.</p>
-          <div class="actions">
-            <a id="contact-email-link" class="button secondary" href="#">Open Email</a>
-          </div>
+        <aside class="subscribe-panel">
+          <p class="eyebrow">Mailing list</p>
+          <h2>Update alerts</h2>
+          <ul>
+            <li>New course materials</li>
+            <li>Blog and field note updates</li>
+            <li>Important card strategy changes</li>
+          </ul>
         </aside>
       </section>
     </main>
@@ -695,11 +685,13 @@ body[data-view="blog"] .view-blog { display: block; }
       <p>Educational content; verify current issuer rules and benefits before acting.</p>
     </footer>
     <script>
-      const contactEmail = ["jadentliu21", "gmail.com"].join("@");
-      document.querySelector("#contact-form").action = `https://formsubmit.co/${contactEmail}`;
-      document.querySelector("#contact-email-display").textContent = contactEmail;
-      document.querySelector("#contact-email-link").href = `mailto:${contactEmail}`;
-      if (location.hash === "#sent") document.body.dataset.contactSent = "true";
+      const mailingListEmail = ["jadentliu21", "gmail.com"].join("@");
+      document.querySelector("#subscribe-form").action = `https://formsubmit.co/${mailingListEmail}`;
+      function syncSubscribeState() {
+        document.body.dataset.subscribeSent = location.hash === "#subscribed" ? "true" : "false";
+      }
+      window.addEventListener("hashchange", syncSubscribeState);
+      syncSubscribeState();
     </script>
   </body>
 </html>
