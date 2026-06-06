@@ -389,6 +389,30 @@ button, input, select, textarea { font: inherit; }
   white-space: pre-wrap;
   font: 0.98rem/1.62 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
+.attachment-gallery {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+}
+.attachment-card {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+.attachment-card img {
+  display: block;
+  width: 100%;
+  max-height: 760px;
+  object-fit: contain;
+  background: #f4f6f8;
+}
+.attachment-card p {
+  margin: 0;
+  padding: 10px 12px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
 .slide { margin-bottom: 14px; }
 .slide h3 {
   margin: 0 0 8px;
