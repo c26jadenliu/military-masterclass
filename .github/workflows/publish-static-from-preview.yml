@@ -1,0 +1,58 @@
+name: Publish static site from preview
+
+on:
+  push:
+    paths:
+      - .github/workflows/publish-static-from-preview.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch generated public files
+        env:
+          SITE_URL: https://brain-charlie-state-finest.trycloudflare.com
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/public-site"
+          curl -fsSL --retry 5 --retry-delay 3 "$SITE_URL/index.html" -o "$RUNNER_TEMP/public-site/index.html"
+          curl -fsSL --retry 5 --retry-delay 3 "$SITE_URL/blog.html" -o "$RUNNER_TEMP/public-site/blog.html"
+          curl -fsSL --retry 5 --retry-delay 3 "$SITE_URL/contact.html" -o "$RUNNER_TEMP/public-site/contact.html"
+          curl -fsSL --retry 5 --retry-delay 3 "$SITE_URL/subscribe.html" -o "$RUNNER_TEMP/public-site/subscribe.html"
+          touch "$RUNNER_TEMP/public-site/.nojekyll"
+          if grep -E "coderedvibecode|drive[.]google|docs[.]google|16j-pjo|Source Folder|sourceUrl|embeddedfolderview|__cf_email__|/cdn-cgi/l/email-protection" "$RUNNER_TEMP/public-site"/*.html; then
+            echo "Found blocked marker in generated public site" >&2
+            exit 1
+          fi
+          grep -q "subscribe.html" "$RUNNER_TEMP/public-site/index.html"
+          grep -q "Military Masterclass mailing list signup" "$RUNNER_TEMP/public-site/index.html"
+          grep -q "Military Masterclass mailing list signup" "$RUNNER_TEMP/public-site/subscribe.html"
+          grep -q "https://c26jadenliu.github.io/military-masterclass/subscribe.html#subscribed" "$RUNNER_TEMP/public-site/subscribe.html"
+          grep -q "const mailingListEmail" "$RUNNER_TEMP/public-site/subscribe.html"
+      - name: Publish to gh-pages
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages
+          git checkout gh-pages
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp "$RUNNER_TEMP/public-site/index.html" .
+          cp "$RUNNER_TEMP/public-site/blog.html" .
+          cp "$RUNNER_TEMP/public-site/contact.html" .
+          cp "$RUNNER_TEMP/public-site/subscribe.html" .
+          cp "$RUNNER_TEMP/public-site/.nojekyll" .
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No generated changes to commit."
+          else
+            git commit -m "Add mailing list subscribe page"
+            git push origin gh-pages
+          fi
