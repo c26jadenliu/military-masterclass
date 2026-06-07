@@ -1,0 +1,87 @@
+name: Deploy polished static site
+
+on:
+  push:
+    paths:
+      - .github/workflows/deploy-static.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      SOURCE_URL: https://frequent-comply-intermediate-sunglasses.trycloudflare.com
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare gh-pages worktree
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages || true
+          if git show-ref --verify --quiet refs/remotes/origin/gh-pages; then
+            git worktree add pages origin/gh-pages
+          else
+            git worktree add --orphan pages gh-pages
+          fi
+
+      - name: Download generated site
+        run: |
+          set -euo pipefail
+          cd pages
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          curl -fsSL "$SOURCE_URL/index.html" -o index.html
+          curl -fsSL "$SOURCE_URL/blog.html" -o blog.html
+          curl -fsSL "$SOURCE_URL/contact.html" -o contact.html
+          curl -fsSL "$SOURCE_URL/subscribe.html" -o subscribe.html
+          touch .nojekyll
+
+      - name: Validate public output
+        run: |
+          set -euo pipefail
+          cd pages
+          python - <<'PY'
+          import json, re, pathlib, sys
+          html = pathlib.Path('index.html').read_text(encoding='utf-8')
+          match = re.search(r'<script id="catalog-data" type="application/json">(.*?)</script>', html, re.S)
+          if not match:
+              sys.exit('catalog data missing')
+          catalog = json.loads(match.group(1))
+          stats = catalog.get('stats', {})
+          expected = {'items': 20, 'text': 20, 'slides': 0, 'sheets': 0, 'resources': 0}
+          if stats != expected:
+              sys.exit(f'unexpected catalog stats: {stats}')
+          attachments = sum(len(item.get('attachments', [])) for item in catalog.get('items', []))
+          if attachments != 5:
+              sys.exit(f'unexpected attachment count: {attachments}')
+          required = ['reader-nav', 'lesson-index', 'clear-search', 'formatText']
+          for token in required:
+              if token not in html:
+                  sys.exit(f'missing polish token: {token}')
+          bad = re.compile(r'teams\.microsoft|sharepoint|drive\.google|content/source|\.teams-cache|cardlessemail|api\.asm|us-prod\.asyncgw', re.I)
+          removed = re.compile(r'transfer partner|pptx|60-days|winter break first and business class flights|sixty-days', re.I)
+          for path in pathlib.Path('.').glob('*.html'):
+              text = path.read_text(encoding='utf-8', errors='ignore')
+              if bad.search(text):
+                  sys.exit(f'private/source marker found in {path}')
+              if removed.search(text):
+                  sys.exit(f'removed item marker found in {path}')
+          PY
+
+      - name: Publish gh-pages
+        run: |
+          set -euo pipefail
+          cd pages
+          git add .
+          if git diff --cached --quiet; then
+            echo "No changes to publish"
+            exit 0
+          fi
+          git commit -m "Polish lesson navigation"
+          git push origin HEAD:gh-pages
