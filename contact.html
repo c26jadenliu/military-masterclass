@@ -201,10 +201,80 @@ button, input, select, textarea { font: inherit; }
   color: var(--muted);
   font-weight: 680;
 }
-.library-band, .blog-band { padding: 34px 0; }
+.course-path-band, .library-band, .blog-band { padding: 34px 0; }
 .library-shell, .blog-shell, .reader-shell {
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
+}
+.course-path-shell {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+}
+.course-path-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.course-path-head h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  letter-spacing: 0;
+}
+.course-path-head p:last-child {
+  max-width: 560px;
+  margin: 0;
+  color: var(--muted);
+}
+.course-path-list {
+  display: grid;
+  gap: 8px;
+  counter-reset: lesson-step;
+}
+.course-step {
+  counter-increment: lesson-step;
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.04);
+}
+.course-step::before {
+  content: counter(lesson-step, decimal-leading-zero);
+  width: 42px;
+  height: 42px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 820;
+}
+.course-step-main {
+  min-width: 0;
+}
+.course-step-main h3 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+.course-step-main p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.course-step-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
 }
 .library-shell {
   display: grid;
@@ -747,6 +817,17 @@ body[data-view="blog"] .view-blog { display: block; }
   .results-head {
     align-items: flex-start;
     flex-direction: column;
+  }
+  .course-path-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .course-step {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+  .course-step-actions {
+    grid-column: 2;
+    justify-content: flex-start;
   }
   .reader-band { padding: 12px 0; }
   .reader-panel { padding: 18px; }
