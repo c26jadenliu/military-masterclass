@@ -1,0 +1,71 @@
+name: Deploy card setup wording update
+
+on:
+  push:
+    paths:
+      - .github/workflows/deploy-static.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      SOURCE_URL: https://webster-refer-payments-mediterranean.trycloudflare.com
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare gh-pages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages || true
+          git worktree add pages origin/gh-pages
+
+      - name: Download generated pages
+        run: |
+          set -euo pipefail
+          cd pages
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          for file in index.html blog.html card-setup.html contact.html subscribe.html; do
+            curl -fsSL "$SOURCE_URL/$file" -o "$file"
+          done
+          touch .nojekyll
+
+      - name: Validate requested update
+        run: |
+          set -euo pipefail
+          cd pages
+          python - <<'PY'
+          from pathlib import Path
+          import re, sys
+          text = Path('card-setup.html').read_text(encoding='utf-8')
+          if 'First listed account' in text:
+              sys.exit('removed summary tile is still present')
+          if 'Authorized User: Citi Dividend' not in text:
+              sys.exit('authorized user label is missing')
+          if '>AU: Citi Dividend<' in text:
+              sys.exit('abbreviated authorized-user label is still visible')
+          statuses = re.findall(r'<tr data-status="(current|planned)"', text)
+          if len(statuses) != 27 or statuses.count('current') != 26 or statuses.count('planned') != 1:
+              sys.exit(f'unexpected setup counts: {len(statuses)}')
+          bad = re.compile(r'C:\\Users\\jaden|Personal Card Strategy.*\.xlsx|content/source', re.I)
+          for path in Path('.').glob('*.html'):
+              if bad.search(path.read_text(encoding='utf-8', errors='ignore')):
+                  sys.exit(f'private source marker in {path}')
+          PY
+
+      - name: Publish gh-pages
+        run: |
+          set -euo pipefail
+          cd pages
+          git add .
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Clarify authorized user setup entry"
+          git push origin HEAD:gh-pages
