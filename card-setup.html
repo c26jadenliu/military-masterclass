@@ -230,10 +230,8 @@ button, input, select, textarea { font: inherit; }
 .course-path-list {
   display: grid;
   gap: 8px;
-  counter-reset: lesson-step;
 }
 .course-step {
-  counter-increment: lesson-step;
   display: grid;
   grid-template-columns: 54px minmax(0, 1fr) auto;
   gap: 14px;
@@ -245,7 +243,7 @@ button, input, select, textarea { font: inherit; }
   box-shadow: 0 8px 24px rgba(16, 24, 40, 0.04);
 }
 .course-step::before {
-  content: counter(lesson-step, decimal-leading-zero);
+  content: attr(data-code);
   width: 42px;
   height: 42px;
   display: inline-grid;
